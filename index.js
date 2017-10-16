@@ -1,6 +1,8 @@
 'use strict'
 
+const assert = require('assert')
 const debug = require('debug')('workq')
+
 var instance = null
 var id = 0
 
@@ -29,6 +31,7 @@ function Queue (opts) {
 }
 
 Queue.prototype.add = function add (job) {
+  assert(typeof job === 'function', 'The job to perform should be a function')
   debug(`Queue ${this._id}, adding new job`)
   this.q.push(job)
   if (!this.running) {
@@ -38,7 +41,7 @@ Queue.prototype.add = function add (job) {
 
 Queue.prototype.run = function run () {
   if (this._pause) {
-    debug(`Queue ${this._id}, worker _paused`)
+    debug(`Queue ${this._id}, worker paused`)
     return
   }
   this.running = true
@@ -47,7 +50,7 @@ Queue.prototype.run = function run () {
 
 function runner () {
   if (this._pause) {
-    debug(`Queue ${this._id}, worker _paused`)
+    debug(`Queue ${this._id}, worker paused`)
     return
   }
 
