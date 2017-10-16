@@ -15,6 +15,18 @@ test('Should create a work queue', t => {
   })
 })
 
+test('Should create a work queue', t => {
+  t.plan(1)
+
+  const q = Queue()
+
+  try {
+    q.add(null)
+  } catch (err) {
+    t.is(err.message, 'The job to perform should be a function')
+  }
+})
+
 test('By default singleton is not enabled', t => {
   t.plan(1)
 
@@ -361,5 +373,151 @@ test('Nested child queue, order should be guaranteed / 8', t => {
   q.add((q, done) => {
     t.is(order.shift(), 7)
     done()
+  })
+})
+
+test('Cannot add more jobs after calling done in nested queues / 1', t => {
+  t.plan(2)
+
+  const q = Queue()
+
+  q.add((child, done) => {
+    child.add((child, done) => {
+      t.ok('called')
+      done()
+    })
+
+    done()
+
+    try {
+      child.add((child, done) => {
+        done()
+      })
+      t.fail()
+    } catch (err) {
+      t.is(err.message, 'You cannot add more jobs after calling done')
+    }
+  })
+})
+
+test('Cannot add more jobs after calling done in nested queues / 2', t => {
+  t.plan(3)
+
+  const q = Queue()
+
+  q.add((child, done) => {
+    child.add((child, done) => {
+      t.ok('called')
+      done()
+
+      try {
+        child.add((child, done) => {
+          done()
+        })
+        t.fail()
+      } catch (err) {
+        t.is(err.message, 'You cannot add more jobs after calling done')
+      }
+    })
+
+    done()
+
+    try {
+      child.add((child, done) => {
+        done()
+      })
+      t.fail()
+    } catch (err) {
+      t.is(err.message, 'You cannot add more jobs after calling done')
+    }
+  })
+})
+
+test('Cannot add more jobs after calling done in nested queues / 3', t => {
+  t.plan(9)
+
+  const q = Queue()
+
+  q.add((child, done) => {
+    child.add((child, done) => {
+      t.ok('called')
+      done()
+
+      try {
+        child.add((child, done) => {
+          done()
+        })
+        t.fail()
+      } catch (err) {
+        t.is(err.message, 'You cannot add more jobs after calling done')
+      }
+    })
+
+    done()
+
+    try {
+      child.add((child, done) => {
+        done()
+      })
+      t.fail()
+    } catch (err) {
+      t.is(err.message, 'You cannot add more jobs after calling done')
+    }
+  })
+
+  setTimeout(() => {
+    q.add((child, done) => {
+      child.add((child, done) => {
+        t.ok('called')
+        done()
+
+        try {
+          child.add((child, done) => {
+            done()
+          })
+          t.fail()
+        } catch (err) {
+          t.is(err.message, 'You cannot add more jobs after calling done')
+        }
+      })
+
+      done()
+
+      try {
+        child.add((child, done) => {
+          done()
+        })
+        t.fail()
+      } catch (err) {
+        t.is(err.message, 'You cannot add more jobs after calling done')
+      }
+    })
+  }, 100)
+
+  q.add((child, done) => {
+    child.add((child, done) => {
+      t.ok('called')
+      done()
+
+      try {
+        child.add((child, done) => {
+          done()
+        })
+        t.fail()
+      } catch (err) {
+        t.is(err.message, 'You cannot add more jobs after calling done')
+      }
+    })
+
+    done()
+
+    try {
+      child.add((child, done) => {
+        done()
+      })
+      t.fail()
+    } catch (err) {
+      t.is(err.message, 'You cannot add more jobs after calling done')
+    }
   })
 })
