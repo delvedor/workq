@@ -1,0 +1,27 @@
+{
+  "name": "workq",
+  "version": "0.1.0",
+  "description": "A super tiny work queue",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delvedor/workq.git"
+  },
+  "keywords": [],
+  "author": "Tomas Della Vedova - @delvedor (http://delved.org)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/delvedor/workq/issues"
+  },
+  "homepage": "https://github.com/delvedor/workq#readme",
+  "devDependencies": {
+    "standard": "^10.0.3",
+    "tap": "^10.7.2"
+  },
+  "dependencies": {
+    "debug": "^3.1.0"
+  }
+}
