@@ -19,8 +19,11 @@ function Queue (opts) {
     }
   }
 
+  // public api
   this.q = []
   this.running = false
+  // private api
+  this._exhausted = false
   this._parent = null
   this._pause = false
   this._id = id
@@ -32,6 +35,7 @@ function Queue (opts) {
 
 Queue.prototype.add = function add (job) {
   assert(typeof job === 'function', 'The job to perform should be a function')
+  assert(this._exhausted === false, 'You cannot add more jobs after calling done')
   debug(`Queue ${this._id}, adding new job`)
   this.q.push(job)
   if (!this.running) {
@@ -59,7 +63,7 @@ function runner () {
   if (!job) {
     this.running = false
     if (this._parent) {
-      debug(`Queue ${this._id}, running _parent ${this._parent._id}`)
+      debug(`Queue ${this._id}, running parent ${this._parent._id}`)
       this._parent._pause = false
       this._parent.run()
     }
@@ -74,6 +78,7 @@ function runner () {
   job(child, done.bind(this))
 
   function done () {
+    child._exhausted = true
     debug(`Queue ${this._id}, worker ended`)
     // if the child has jobs in the queue
     if (child.q.length) {
@@ -90,7 +95,7 @@ function runner () {
       debug(`Queue ${this._id}, finished queue`)
       this.running = false
       if (this._parent) {
-        debug(`Queue ${this._id}, running _parent ${this._parent._id}`)
+        debug(`Queue ${this._id}, running parent ${this._parent._id}`)
         this._parent._pause = false
         this._parent.run()
       }
