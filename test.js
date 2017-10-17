@@ -44,9 +44,14 @@ test('Should create a singleton work queue', t => {
   const q1 = Queue({ singleton: true })
   const q2 = Queue({ singleton: true })
 
-  q1.q = ['test']
+  q1.q = [worker]
+
+  function worker (child, done) {
+    done()
+  }
 
   t.deepEqual(q1, q2)
+  q1.run()
 })
 
 test('The order should be guaranteed / 1', t => {
@@ -371,6 +376,53 @@ test('Nested child queue, order should be guaranteed / 8', t => {
   })
 
   q.add((q, done) => {
+    t.is(order.shift(), 7)
+    done()
+  })
+})
+
+test('Nested child queue, order should be guaranteed / 9 (with singleton)', t => {
+  t.plan(7)
+
+  const q1 = Queue({ singleton: true })
+  const q2 = Queue({ singleton: true })
+  const order = [1, 2, 3, 4, 5, 6, 7]
+
+  q2.add((q, done) => {
+    t.is(order.shift(), 1)
+    done()
+  })
+
+  q1.add((q, done) => {
+    t.is(order.shift(), 2)
+
+    q.add((q, done) => {
+      setTimeout(() => {
+        t.is(order.shift(), 3)
+
+        q.add((q, done) => {
+          t.is(order.shift(), 5)
+          done()
+        })
+
+        done()
+      }, 100)
+
+      q.add((q, done) => {
+        t.is(order.shift(), 4)
+        done()
+      })
+    })
+
+    q.add((q, done) => {
+      t.is(order.shift(), 6)
+      done()
+    })
+
+    done()
+  })
+
+  q2.add((q, done) => {
     t.is(order.shift(), 7)
     done()
   })
