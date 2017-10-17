@@ -48,7 +48,6 @@ Queue.prototype.run = function run () {
     debug(`Queue ${this._id}, worker paused`)
     return
   }
-  this.running = true
   setImmediate(() => runner.call(this))
 }
 
@@ -59,14 +58,11 @@ function runner () {
   }
 
   debug(`Queue ${this._id}, running worker`)
+  this.running = true
   const job = this.q.shift()
   if (!job) {
     this.running = false
-    if (this._parent) {
-      debug(`Queue ${this._id}, running parent ${this._parent._id}`)
-      this._parent._pause = false
-      this._parent.run()
-    }
+    runParent.call(this)
     return
   }
 
@@ -94,13 +90,16 @@ function runner () {
     } else {
       debug(`Queue ${this._id}, finished queue`)
       this.running = false
-      if (this._parent) {
-        debug(`Queue ${this._id}, running parent ${this._parent._id}`)
-        this._parent._pause = false
-        this._parent.run()
-      }
+      runParent.call(this)
     }
   }
+}
+
+function runParent () {
+  if (!this._parent) return
+  debug(`Queue ${this._id}, running parent ${this._parent._id}`)
+  this._parent._pause = false
+  this._parent.run()
 }
 
 module.exports = Queue
