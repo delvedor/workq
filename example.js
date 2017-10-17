@@ -8,26 +8,23 @@ q.add((q, done) => {
   done()
 })
 
-setTimeout(() => {
-  q.add((q, done) => {
-    setTimeout(() => {
-      console.log(4)
-      done()
-    }, 100)
-
-    q.add((q, done) => {
-      console.log(5)
-      done()
-    })
-  })
-}, 100)
-
 q.add((q, done) => {
   console.log(2)
+
+  q.add((q, done) => {
+    console.log(3)
+    done()
+  })
+
   done()
 })
 
 q.add((q, done) => {
-  console.log(3)
+  console.log(4)
+  done()
+})
+
+q.add((q, done) => {
+  console.log(5)
   done()
 })
