@@ -32,6 +32,23 @@ function nestedJob (child, done) {
 })
 ```
 
+Async/await and promises are supported as well!
+```js
+const q = require('workq')()
+
+q.add(job)
+
+// there is no need to call `done`!
+async function job (child) {
+  // perform some work
+  // you can add nested jobs!
+  child.add(nestedJob)
+})
+
+async function nestedJob (child) {
+  // perform some work
+})
+```
 ## Acknowledgements
 
 This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
