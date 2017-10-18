@@ -2,7 +2,7 @@
 
 const t = require('tap')
 const test = t.test
-const Queue = require('./index')
+const Queue = require('../index')
 
 test('Should create a work queue', t => {
   t.plan(1)
@@ -15,7 +15,7 @@ test('Should create a work queue', t => {
   })
 })
 
-test('Should create a work queue', t => {
+test('Job should be a function', t => {
   t.plan(1)
 
   const q = Queue()
@@ -572,4 +572,46 @@ test('Cannot add more jobs after calling done in nested queues / 3', t => {
       t.is(err.message, 'You cannot add more jobs after calling done')
     }
   })
+})
+
+test('The order should be guaranteed (with promises)', t => {
+  t.plan(5)
+
+  const q = Queue()
+  const order = [1, 2, 3, 4, 5]
+
+  q.add(q => {
+    t.is(order.shift(), 1)
+    return Promise.resolve()
+  })
+
+  q.add(q => {
+    t.is(order.shift(), 2)
+
+    q.add(q => {
+      t.is(order.shift(), 3)
+      return Promise.resolve()
+    })
+
+    return Promise.reject() // eslint-disable-line
+  })
+
+  q.add(q => {
+    t.is(order.shift(), 4)
+    return Promise.resolve()
+  })
+
+  q.add(q => {
+    t.is(order.shift(), 5)
+    return Promise.resolve()
+  })
+})
+
+test('async await support', t => {
+  if (Number(process.versions.node[0]) >= 8) {
+    require('./async-await')(Queue, t.test)
+  } else {
+    t.pass('Skip because Node version < 8')
+  }
+  t.end()
 })

@@ -4,8 +4,8 @@
   "description": "A super tiny work queue",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tap test.js",
-    "coveralls": "tap test.js --cov"
+    "test": "standard && tap test/test.js",
+    "coveralls": "tap test/test.js --cov"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,8 @@
     "work",
     "q",
     "nested",
-    "order"
+    "order",
+    "async"
   ],
   "author": "Tomas Della Vedova - @delvedor (http://delved.org)",
   "license": "MIT",
@@ -27,7 +28,8 @@
   "devDependencies": {
     "coveralls": "^3.0.0",
     "standard": "^10.0.3",
-    "tap": "^10.7.2"
+    "tap": "^10.7.2",
+    "then-sleep": "^1.0.1"
   },
   "dependencies": {
     "debug": "^3.1.0"
