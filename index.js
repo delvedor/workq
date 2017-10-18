@@ -26,7 +26,7 @@ function Queue (opts) {
   this._exhausted = false
   this._parent = null
   this._pause = false
-  this._id = id
+  this._id = id++
 
   if (opts.singleton) {
     return instance
@@ -45,7 +45,7 @@ Queue.prototype.add = function add (job) {
 
 Queue.prototype.run = function run () {
   if (this._pause) {
-    debug(`Queue ${this._id}, worker paused`)
+    debug(`Queue ${this._id}, job paused`)
     return
   }
   setImmediate(() => runner.call(this))
@@ -53,29 +53,33 @@ Queue.prototype.run = function run () {
 
 function runner () {
   if (this._pause) {
-    debug(`Queue ${this._id}, worker paused`)
+    debug(`Queue ${this._id}, job paused`)
     return
   }
 
-  debug(`Queue ${this._id}, running worker`)
+  debug(`Queue ${this._id}, running job`)
   this.running = true
   const job = this.q.shift()
   if (!job) {
     this.running = false
-    runParent.call(this)
+    parent.call(this)
     return
   }
 
   const child = new Queue()
-  child._id = ++id
   child._parent = this
   child._pause = true
 
-  job(child, done.bind(this))
+  const asyncOp = job(child, done.bind(this))
+  if (asyncOp && typeof asyncOp.then === 'function') {
+    this._pause = true
+    asyncOp.then(done.bind(this)).catch(done.bind(this))
+  }
 
   function done () {
     child._exhausted = true
-    debug(`Queue ${this._id}, worker ended`)
+    this._pause = false
+    debug(`Queue ${this._id}, job ended`)
     // if the child has jobs in the queue
     if (child.q.length) {
       debug(`Queue ${this._id}, starting child queue (${child.q.length} jobs yet to be executed)`)
@@ -84,18 +88,18 @@ function runner () {
       child.run()
     // if the current queue has jobs yet to be executed
     } else if (this.q.length) {
-      debug(`Queue ${this._id}, running next worker (${this.q.length} jobs yet to be executed)`)
+      debug(`Queue ${this._id}, running next job (${this.q.length} jobs yet to be executed)`)
       this.run()
     // the current queue has finished its execution
     } else {
       debug(`Queue ${this._id}, finished queue`)
       this.running = false
-      runParent.call(this)
+      parent.call(this)
     }
   }
 }
 
-function runParent () {
+function parent () {
   if (!this._parent) return
   debug(`Queue ${this._id}, running parent ${this._parent._id}`)
   this._parent._pause = false
