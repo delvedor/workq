@@ -123,6 +123,42 @@ test('The order should be guaranteed / 2', t => {
   })
 })
 
+test('The order should be guaranteed / 3', t => {
+  t.plan(6)
+
+  const q = Queue()
+  const order = [1, 2, 3, 4, 5, 6]
+
+  q.add((q, done) => {
+    t.is(order.shift(), 1)
+    setTimeout(() => {
+      t.is(order.shift(), 2)
+      done()
+    }, 100)
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 3)
+
+    q.add((q, done) => {
+      t.is(order.shift(), 4)
+      done()
+    })
+
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 5)
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 6)
+    done()
+  })
+})
+
 test('Nested child queue, order should be guaranteed / 1', t => {
   t.plan(5)
 

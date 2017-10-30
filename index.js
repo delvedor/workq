@@ -48,6 +48,8 @@ Queue.prototype.run = function run () {
     debug(`Queue ${this._id}, job paused`)
     return
   }
+
+  this.running = true
   setImmediate(() => runner.call(this))
 }
 
@@ -58,7 +60,6 @@ function runner () {
   }
 
   debug(`Queue ${this._id}, running job`)
-  this.running = true
   const job = this.q.shift()
   if (!job) {
     this.running = false
