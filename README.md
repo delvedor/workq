@@ -49,6 +49,32 @@ async function nestedJob (child) {
   // perform some work
 })
 ```
+
+If you need to know when a queue has finished all its jobs, you can use the `drain` api.  
+*Note that in the top queue the drain hook can be called multiple times.*
+```js
+const q = require('workq')()
+
+q.drain(done => {
+  // the current queue has finished its jobs
+  // async await is supported as well
+  done()
+})
+
+q.add(job)
+
+function job (child, done) {
+  // perform some work
+  // you can add nested jobs!
+  child.add(nestedJob)
+  done()
+})
+
+function nestedJob (child, done) {
+  // perform some work
+  done()
+})
+```
 ## Acknowledgements
 
 This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
