@@ -651,3 +651,58 @@ test('async await support', t => {
   }
   t.end()
 })
+
+test('Drain hook', t => {
+  t.plan(7)
+
+  const q = Queue()
+  const order = [1, 2, 3, 4, 5]
+
+  q.drain(done => {
+    t.ok('called')
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 1)
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 2)
+
+    q.add((q, done) => {
+      t.is(order.shift(), 3)
+      done()
+    })
+
+    q.drain(done => {
+      t.ok('called')
+      done()
+    })
+
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 4)
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 5)
+    done()
+  })
+})
+
+test('Drain should be a function', t => {
+  t.plan(1)
+
+  const q = Queue()
+
+  try {
+    q.drain(null)
+  } catch (err) {
+    t.is(err.message, 'Drain should be a function')
+  }
+})
