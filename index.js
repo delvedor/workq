@@ -27,6 +27,7 @@ function Queue (opts) {
   this._parent = null
   this._pause = false
   this._id = id++
+  this._drain = drain.bind(this)
 
   if (opts.singleton) {
     return instance
@@ -53,7 +54,14 @@ Queue.prototype.run = function run () {
   setImmediate(() => runner.call(this))
 }
 
+Queue.prototype.drain = function drain (fn) {
+  assert(typeof fn === 'function', 'Drain should be a function')
+  debug(`Queue ${this._id}, add drain function`)
+  this._drain = fn
+}
+
 function runner () {
+  /* istanbul ignore next */
   if (this._pause) {
     debug(`Queue ${this._id}, job paused`)
     return
@@ -63,7 +71,11 @@ function runner () {
   const job = this.q.shift()
   if (!job) {
     this.running = false
-    parent.call(this)
+    const asyncOp = this._drain(parent.bind(this))
+    /* istanbul ignore next */
+    if (asyncOp && typeof asyncOp.then === 'function') {
+      asyncOp.then(parent.bind(this)).catch(parent.bind(this))
+    }
     return
   }
 
@@ -95,7 +107,10 @@ function runner () {
     } else {
       debug(`Queue ${this._id}, finished queue`)
       this.running = false
-      parent.call(this)
+      const asyncOp = this._drain(parent.bind(this))
+      if (asyncOp && typeof asyncOp.then === 'function') {
+        asyncOp.then(parent.bind(this)).catch(parent.bind(this))
+      }
     }
   }
 }
@@ -105,6 +120,11 @@ function parent () {
   debug(`Queue ${this._id}, running parent ${this._parent._id}`)
   this._parent._pause = false
   this._parent.run()
+}
+
+function drain (done) {
+  debug(`Queue ${this._id}, drain`)
+  done()
 }
 
 module.exports = Queue
