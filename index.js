@@ -79,7 +79,12 @@ function runner () {
     return
   }
 
-  const child = new Queue()
+  // inherit properties from prototype
+  const child = Object.create(this)
+  child.q = []
+  child.running = false
+  child._exhausted = false
+  child._id = id++
   child._parent = this
   child._pause = true
 
