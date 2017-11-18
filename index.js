@@ -24,6 +24,7 @@ function Queue (opts) {
   this.running = false
   // private api
   this._exhausted = false
+  this._shareDrainHandler = opts.shareDrainHandler
   this._parent = null
   this._pause = false
   this._id = id++
@@ -87,6 +88,10 @@ function runner () {
   child._id = id++
   child._parent = this
   child._pause = true
+
+  if (!child._shareDrainHandler) {
+    child._drain = drain.bind(child)
+  }
 
   const asyncOp = job(child, done.bind(this))
   if (asyncOp && typeof asyncOp.then === 'function') {

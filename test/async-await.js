@@ -106,7 +106,7 @@ function asyncAwait (Queue, test) {
   test('Use drain handler from parent queue', t => {
     t.plan(7)
 
-    const q = Queue()
+    const q = Queue({ shareDrainHandler: true })
     const order = [1, 2, 3, 4, 5]
 
     q.drain(async () => {
