@@ -102,6 +102,38 @@ function asyncAwait (Queue, test) {
       t.is(order.shift(), 5)
     })
   })
+
+  test('Use drain handler from parent queue', t => {
+    t.plan(7)
+
+    const q = Queue()
+    const order = [1, 2, 3, 4, 5]
+
+    q.drain(async () => {
+      await sleep(100)
+      t.ok('called') // Is called twice
+    })
+
+    q.add(async q => {
+      t.is(order.shift(), 1)
+    })
+
+    q.add(async q => {
+      t.is(order.shift(), 2)
+
+      q.add(async q => {
+        t.is(order.shift(), 3)
+      })
+    })
+
+    q.add(async q => {
+      t.is(order.shift(), 4)
+    })
+
+    q.add(async q => {
+      t.is(order.shift(), 5)
+    })
+  })
 }
 
 module.exports = asyncAwait
