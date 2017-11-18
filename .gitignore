@@ -63,5 +63,5 @@ typings/
 # vim swap files
 *.swp
 
-#lock
+# NPM lock file
 package-lock.json
