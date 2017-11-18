@@ -24,6 +24,7 @@ function Queue (opts) {
   this.running = false
   // private api
   this._exhausted = false
+  this._shareDrainHandler = opts.shareDrainHandler
   this._parent = null
   this._pause = false
   this._id = id++
@@ -79,10 +80,7 @@ function runner () {
     return
   }
 
-  const child = new Queue()
-  child._parent = this
-  child._pause = true
-
+  const child = createChild(this)
   const asyncOp = job(child, done.bind(this))
   if (asyncOp && typeof asyncOp.then === 'function') {
     this._pause = true
@@ -113,6 +111,22 @@ function runner () {
       }
     }
   }
+}
+
+function createChild (parentQ) {
+  // inherit properties from prototype
+  const child = Object.create(parentQ)
+  child.q = []
+  child.running = false
+  child._exhausted = false
+  child._id = id++
+  child._parent = parentQ
+  child._pause = true
+
+  if (!child._shareDrainHandler) {
+    child._drain = drain.bind(child)
+  }
+  return child
 }
 
 function parent () {

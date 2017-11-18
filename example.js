@@ -3,6 +3,11 @@
 const Queue = require('./index')
 const q = Queue()
 
+q.drain((done) => {
+  console.log('Drain')
+  done()
+})
+
 q.add((q, done) => {
   console.log(1)
   done()

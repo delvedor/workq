@@ -695,6 +695,44 @@ test('Drain hook', t => {
   })
 })
 
+test('Use drain handler from parent queue', t => {
+  t.plan(7)
+
+  const q = Queue({ shareDrainHandler: true })
+  const order = [1, 2, 3, 4, 5]
+
+  q.drain(done => {
+    t.ok('called') // Is called twice
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 1)
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 2)
+
+    q.add((q, done) => {
+      t.is(order.shift(), 3)
+      done()
+    })
+
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 4)
+    done()
+  })
+
+  q.add((q, done) => {
+    t.is(order.shift(), 5)
+    done()
+  })
+})
+
 test('Drain should be a function', t => {
   t.plan(1)
 
