@@ -75,9 +75,23 @@ function nestedJob (child, done) {
   done()
 })
 ```
-## Acknowledgements
 
-This project is kindly sponsored by [LetzDoIt](http://www.letzdoitapp.com/).
+If you need to pass some parameter to the job, just add them after the function in `add`:
+```js
+const q = require('workq')()
+
+q.add(job, 'hello', 42)
+
+function job (child, greeting, num, done) {
+  console.log(greeting, num) // 'hello' 42
+  done()
+})
+
+function nestedJob (child, done) {
+  // perform some work
+  done()
+})
+```
 
 ## License
 

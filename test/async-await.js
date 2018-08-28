@@ -102,6 +102,19 @@ function asyncAwait (Queue, test) {
       t.is(order.shift(), 5)
     })
   })
+
+  test('Should handle parameters', t => {
+    t.plan(2)
+
+    const q = Queue()
+
+    async function worker (q, a, b) {
+      t.strictEqual(a, 'a')
+      t.strictEqual(b, 'b')
+    }
+
+    q.add(worker, 'a', 'b')
+  })
 }
 
 module.exports = asyncAwait
