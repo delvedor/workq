@@ -34,11 +34,11 @@ function Queue (opts) {
   }
 }
 
-Queue.prototype.add = function add (job) {
+Queue.prototype.add = function add (job, ...params) {
   assert(typeof job === 'function', 'The job to perform should be a function')
   assert(this._exhausted === false, 'You cannot add more jobs after calling done')
   debug(`Queue ${this._id}, adding new job`)
-  this.q.push(job)
+  this.q.push({ job, params })
   if (!this.running) {
     this.run()
   }
@@ -68,13 +68,13 @@ function runner () {
   }
 
   debug(`Queue ${this._id}, running job`)
-  const job = this.q.shift()
-  if (!job) {
+  const worker = this.q.shift()
+  if (worker === undefined) {
     this.running = false
     const asyncOp = this._drain(parent.bind(this))
     /* istanbul ignore next */
     if (asyncOp && typeof asyncOp.then === 'function') {
-      asyncOp.then(parent.bind(this)).catch(parent.bind(this))
+      asyncOp.then(parent.bind(this), parent.bind(this))
     }
     return
   }
@@ -83,10 +83,13 @@ function runner () {
   child._parent = this
   child._pause = true
 
-  const asyncOp = job(child, done.bind(this))
+  const { job, params } = worker
+  const asyncOp = params.length === 0
+    ? job(child, done.bind(this))
+    : job(child, ...params, done.bind(this))
   if (asyncOp && typeof asyncOp.then === 'function') {
     this._pause = true
-    asyncOp.then(done.bind(this)).catch(done.bind(this))
+    asyncOp.then(done.bind(this), done.bind(this))
   }
 
   function done () {
@@ -109,7 +112,7 @@ function runner () {
       this.running = false
       const asyncOp = this._drain(parent.bind(this))
       if (asyncOp && typeof asyncOp.then === 'function') {
-        asyncOp.then(parent.bind(this)).catch(parent.bind(this))
+        asyncOp.then(parent.bind(this), parent.bind(this))
       }
     }
   }
