@@ -44,7 +44,7 @@ test('Should create a singleton work queue', t => {
   const q1 = Queue({ singleton: true })
   const q2 = Queue({ singleton: true })
 
-  q1.q = [worker]
+  q1.q = [{ job: worker, params: [] }]
 
   function worker (child, done) {
     done()
@@ -705,4 +705,18 @@ test('Drain should be a function', t => {
   } catch (err) {
     t.is(err.message, 'Drain should be a function')
   }
+})
+
+test('Should handle parameters', t => {
+  t.plan(2)
+
+  const q = Queue()
+
+  function worker (q, a, b, done) {
+    t.strictEqual(a, 'a')
+    t.strictEqual(b, 'b')
+    done()
+  }
+
+  q.add(worker, 'a', 'b')
 })
