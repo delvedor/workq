@@ -25,6 +25,9 @@
     "url": "https://github.com/delvedor/workq/issues"
   },
   "homepage": "https://github.com/delvedor/workq#readme",
+  "engines" : {
+    "node": ">=6"
+  },
   "devDependencies": {
     "coveralls": "^3.0.0",
     "standard": "^10.0.3",
