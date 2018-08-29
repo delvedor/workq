@@ -4,8 +4,8 @@
   "description": "A super tiny work queue",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tap test/test.js",
-    "coveralls": "tap test/test.js --cov"
+    "test": "standard && tap test/*.test.js",
+    "coveralls": "tap test/*.test.js --cov"
   },
   "repository": {
     "type": "git",
