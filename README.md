@@ -86,9 +86,19 @@ function job (child, greeting, num, done) {
   console.log(greeting, num) // 'hello' 42
   done()
 })
+```
 
-function nestedJob (child, done) {
-  // perform some work
+If needed you can also use the `child` method to create custom child queues. The child queues will be executed once the current queue has finished its execution.
+```js
+const q = require('workq')()
+
+const childq = q.child()
+
+q.add(job, 'hello', 42)
+childq.add(job, 'hello', 42)
+
+function job (child, greeting, num, done) {
+  console.log(greeting, num) // 'hello' 42
   done()
 })
 ```

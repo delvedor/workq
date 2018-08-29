@@ -720,3 +720,27 @@ test('Should handle parameters', t => {
 
   q.add(worker, 'a', 'b')
 })
+
+test('Chainable API', t => {
+  t.plan(4)
+
+  const q = Queue()
+
+  q
+    .add((q, done) => {
+      t.ok('called')
+      done()
+    })
+    .add((q, done) => {
+      t.ok('called')
+      done()
+    })
+    .drain(done => {
+      t.ok('called')
+      done()
+    })
+    .add((q, done) => {
+      t.ok('called')
+      done()
+    })
+})
