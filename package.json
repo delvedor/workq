@@ -4,8 +4,8 @@
   "description": "A super tiny work queue",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tap test/*.test.js",
-    "coveralls": "tap test/*.test.js --cov"
+    "test": "standard && tap test/*.test.js --no-coverage",
+    "coveralls": "tap test/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -25,16 +25,16 @@
     "url": "https://github.com/delvedor/workq/issues"
   },
   "homepage": "https://github.com/delvedor/workq#readme",
-  "engines" : {
-    "node": ">=6"
+  "engines": {
+    "node": ">=10"
   },
   "devDependencies": {
-    "coveralls": "^3.0.0",
-    "standard": "^10.0.3",
-    "tap": "^10.7.2",
+    "coveralls": "^3.0.9",
+    "standard": "^14.3.1",
+    "tap": "^14.10.2",
     "then-sleep": "^1.0.1"
   },
   "dependencies": {
-    "debug": "^3.1.0"
+    "debug": "^4.1.1"
   }
 }
